@@ -63,13 +63,13 @@ paths:
       tags:
         - News
       parameters:
-        - name: search
+        - name: q
           in: query
           description: Search query for article content (supports AND, OR, NOT operators)
           required: false
           schema:
             type: string
-            example: "covid AND vaccine"
+            example: "college"
         - name: country
           in: query
           description: Filter by country codes (comma-separated, 2-letter ISO codes)
@@ -77,14 +77,14 @@ paths:
           schema:
             type: string
             pattern: '^[A-Z]{2}(,[A-Z]{2})*$'
-            example: "US,GB,CA"
+            example: "US"
         - name: topic
           in: query
           description: Filter by topics (comma-separated)
           required: false
           schema:
             type: string
-            example: "technology,healthcare"
+            example: "education"
         - name: language
           in: query
           description: Filter by language code (2-letter ISO code)
@@ -99,7 +99,7 @@ paths:
           required: false
           schema:
             type: string
-            example: "Reuters"
+            example: "WHDH 7News"
         - name: start_date
           in: query
           description: Start date for articles (ISO 8601 format, YYYY-MM-DD)
@@ -107,7 +107,7 @@ paths:
           schema:
             type: string
             format: date
-            example: "2024-01-01"
+            example: "2025-06-01"
         - name: end_date
           in: query
           description: End date for articles (ISO 8601 format, YYYY-MM-DD, max 90 days from start_date)
@@ -115,7 +115,7 @@ paths:
           schema:
             type: string
             format: date
-            example: "2024-01-31"
+            example: "2025-08-30"
         - name: per_page
           in: query
           description: |
@@ -136,7 +136,6 @@ paths:
           required: false
           schema:
             type: string
-            example: "eyJvZmZzZXQiOjEsInRpbWVzdGFtcCI6IjIwMjUtMDctMjFUMTY6MjA6NTEuMjkxWiJ9"
       responses:
         '200':
           description: Successful response with news articles
@@ -148,16 +147,16 @@ paths:
                 data:
                   - id: "c6d1fc78-2ff3-43e6-9889-2da0ea831262"
                     title: "Major Technology Breakthrough Announced"
-                    source_title: "TechNews Daily"
-                    source_link: "https://technews.com"
-                    article_link: "https://technews.com/articles/breakthrough"
+                    source_title: "Boston.com"
+                    source_link: "https://boston.com"
+                    article_link: "https://boston.com/articles/breakthrough"
                     keywords: ["technology", "innovation", "AI"]
                     topics: ["technology", "artificial intelligence"]
                     description: "Scientists announce significant breakthrough in AI technology..."
-                    pub_date: "2024-01-15T10:30:00Z"
+                    pub_date: "2025-01-15T10:30:00Z"
                     creator: "John Smith"
                     content: "Scientists at leading research institutions have announced..."
-                    media_url: "https://technews.com/images/breakthrough.jpg"
+                    media_url: "https://boston.com/images/breakthrough.jpg"
                     media_type: "image"
                     language: "en"
                     sentiment:
@@ -165,14 +164,14 @@ paths:
                       neg: 0.1
                       neu: 0.2
                     source:
-                      id: "technews-daily"
+                      id: "boston-com"
                       country: "US"
                       political_leaning: "center"
                       reliability_score: 8.5
                       type: "digital_native"
                 total_results: 156789
                 per_page: 20
-                next_cursor: "eyJvZmZzZXQiOjIwLCJ0aW1lc3RhbXAiOiIyMDI0LTAxLTE1VDEwOjMwOjAwWiJ9"
+                next_cursor: "eyJvZmZzZXQiOjIwLCJ0aW1lc3RhbXAiOiIyMDI1LTAxLTE1VDEwOjMwOjAwWiJ9"
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -187,8 +186,6 @@ paths:
       summary: Retrieve news sources
       description: |
         Retrieve news sources with comprehensive filtering options.
-
-        **Access Restriction:** Only available to Basic and Pro plan subscribers.
 
         **Pagination:** Results are sorted alphabetically by title for consistent ordering.
       operationId: getSources
@@ -233,21 +230,21 @@ paths:
           required: false
           schema:
             type: string
-            example: "national,international"
+            example: "national"
         - name: locality
           in: query
           description: Filter by city/locality (partial match)
           required: false
           schema:
             type: string
-            example: "New York"
+            example: "Washington, DC"
         - name: q
           in: query
           description: Search query for source title and description (supports exact phrase with quotes)
           required: false
           schema:
             type: string
-            example: "New York Times"
+            example: "American Free Press"
         - name: per_page
           in: query
           description: Number of results per page (20 or 50)
@@ -263,7 +260,6 @@ paths:
           required: false
           schema:
             type: string
-            example: "eyJzb3J0IjpbIk5ldyBZb3JrIFRpbWVzIiwibmV3c3l0aW1lcyJdfQ=="
       responses:
         '200':
           description: Successful response with news sources
@@ -272,38 +268,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/SourcesResponse'
               example:
+                next_cursor: "QW1lcmljYW4gRnJlZSBQcmVzcyxhbWVyaWNhbi1mcmVlLXByZXNz"
+                total_results: 1
+                per_page: 20
                 data:
-                  - id: "nytimes"
-                    title: "The New York Times"
-                    description: "Breaking news, world news, and multimedia"
+                  - id: "american-free-press"
+                    title: "American Free Press"
+                    description: "American Free Press is a publication known for its controversial and often conspiratorial content, focusing on topics such as government, politics, and historical revisionism. Established in 2001, it has been associated with far-right perspectives and has faced criticism for promoting conspiracy theories and misinformation. The publication claims to offer alternative viewpoints not covered by mainstream media. Its significance lies in its appeal to a niche audience interested in non-mainstream narratives and skepticism towards government and media institutions."
                     country: "US"
                     language: "en"
                     region: "north_america"
                     type: "newspaper"
-                    coverage: ["national", "international"]
-                    website: "https://nytimes.com"
-                    base_url: "https://nytimes.com"
+                    coverage: ["national"]
+                    website: "https://americanfreepress.net"
+                    base_url: "americanfreepress.net"
                     geolocation:
-                      latitude: 40.7589
-                      longitude: -73.9851
-                      city: "New York"
+                      latitude: 38.89511
+                      longitude: -77.03637
+                      city: "Washington, DC"
                       timezone: "America/New_York"
-                    founded_year: 1851
+                    founded_year: 2001
                     enhanced_metadata:
-                      reliability_score: 9
+                      reliability_score: 3
                       bias_rating:
-                        political_leaning: "center-left"
-                        objectivity_score: 8
-                      content_focus: ["politics", "world_news", "business"]
-                next_cursor: "eyJzb3J0IjpbIlRoZSBOZXcgWW9yayBUaW1lcyIsIm55dGltZXMiXX0="
-                total_results: 2847
-                per_page: 20
+                        political_leaning: "far_right"
+                        objectivity_score: 2
+                      content_focus: ["politics", "government", "conspiracy theories", "historical revisionism"]
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
@@ -314,8 +308,6 @@ paths:
       summary: Get source by ID
       description: |
         Retrieve a specific news source by its unique identifier.
-
-        **Access Restriction:** Only available to Basic and Pro plan subscribers.
       operationId: getSourceById
       tags:
         - Sources
@@ -326,7 +318,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "nytimes"
+            example: "newsweek"
       responses:
         '200':
           description: Successful response with source details
@@ -335,34 +327,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/NewsSource'
               example:
-                id: "nytimes"
-                title: "The New York Times"
-                description: "Breaking news, world news, and multimedia"
+                id: "newsweek"
+                title: "Newsweek"
+                description: "Newsweek is a prominent American news magazine founded in 1933, known for its in-depth analysis and coverage of global and national issues. It offers a diverse range of content, including politics, business, technology, and culture, appealing to a broad audience. Historically, Newsweek has undergone several transformations, including shifts in ownership and format, but remains a significant player in the media landscape. It is recognized for its investigative journalism and strives to provide balanced reporting while occasionally featuring opinion pieces."
                 country: "US"
                 language: "en"
                 region: "north_america"
-                type: "newspaper"
+                type: "magazine"
                 coverage: ["national", "international"]
-                website: "https://nytimes.com"
-                base_url: "https://nytimes.com"
+                website: "https://newsweek.com"
+                base_url: "https://newsweek.com"
                 geolocation:
-                  latitude: 40.7589
-                  longitude: -73.9851
-                  city: "New York"
+                  latitude: 40.7128
+                  longitude: -74.006
+                  city: "New York, NY"
                   timezone: "America/New_York"
-                founded_year: 1851
+                founded_year: 1933
                 enhanced_metadata:
-                  reliability_score: 9
+                  reliability_score: 8
                   bias_rating:
-                    political_leaning: "center-left"
-                    objectivity_score: 8
-                  content_focus: ["politics", "world_news", "business"]
+                    political_leaning: "center"
+                    objectivity_score: 7
+                  content_focus: ["politics", "business", "technology", "culture", "international affairs"]
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -580,15 +570,15 @@ components:
         id:
           type: string
           description: Unique source identifier
-          example: "nytimes"
+          example: "ctpost"
         title:
           type: string
           description: Source name
-          example: "The New York Times"
+          example: "Connecticut Post"
         description:
           type: string
           description: Source description
-          example: "Breaking news, world news, and multimedia"
+          example: "The Connecticut Post, established in 1883, is a prominent daily newspaper headquartered in Bridgeport, Connecticut. It primarily serves the Fairfield County area, offering comprehensive coverage of local and regional news, politics, business, and sports."
         country:
           type: string
           description: Country code (2-letter ISO)
@@ -610,24 +600,24 @@ components:
           items:
             type: string
           description: Coverage areas
-          example: ["national", "international"]
+          example: ["local", "regional", "national"]
         website:
           type: string
           format: uri
           description: Source website URL
-          example: "https://nytimes.com"
+          example: "https://ctpost.com"
         base_url:
           type: string
           format: uri
           description: Base URL for the source
-          example: "https://nytimes.com"
+          example: "ctpost.com"
         geolocation:
           $ref: '#/components/schemas/Geolocation'
         founded_year:
           type: integer
           nullable: true
           description: Year the source was founded
-          example: 1851
+          example: 1883
         enhanced_metadata:
           $ref: '#/components/schemas/EnhancedMetadata'
 
@@ -639,17 +629,17 @@ components:
           format: float
           nullable: true
           description: Latitude coordinate
-          example: 40.7589
+          example: 41.1792
         longitude:
           type: number
           format: float
           nullable: true
           description: Longitude coordinate
-          example: -73.9851
+          example: -73.1894
         city:
           type: string
           description: City location
-          example: "New York"
+          example: "Bridgeport, Connecticut"
         timezone:
           type: string
           description: Timezone identifier
@@ -664,7 +654,7 @@ components:
           minimum: 0
           maximum: 10
           description: Reliability score (0-10)
-          example: 9
+          example: 8
         bias_rating:
           $ref: '#/components/schemas/BiasRating'
         content_focus:
@@ -672,7 +662,7 @@ components:
           items:
             type: string
           description: Primary content focus areas
-          example: ["politics", "world_news", "business"]
+          example: ["local news", "regional news", "politics", "business", "sports"]
 
     BiasRating:
       type: object
@@ -680,14 +670,14 @@ components:
         political_leaning:
           type: string
           description: Political leaning classification
-          example: "center-left"
+          example: "center"
         objectivity_score:
           type: integer
           nullable: true
           minimum: 0
           maximum: 10
           description: Objectivity score (0-10)
-          example: 8
+          example: 7
 
 
     Error:
