@@ -1,0 +1,713 @@
+openapi: 3.0.1
+info:
+  title: NewsDataHub API - US Politics
+  description: |
+    Get comprehensive coverage of US political news including elections, policy, government, and congressional activities.
+
+    This specialized collection provides pre-configured examples for tracking US political developments across different sources and political leanings.
+
+    ## Authentication
+    All endpoints require authentication using an API key in the `X-API-Key` header.
+
+    **Get your API key:**
+    Sign up at [newsdatahub.com](https://newsdatahub.com) to get instant access. Choose from:
+    - **Free tier** with limited features (no credit card required)
+    - **Full-featured 7-day free trial** (credit card required)
+
+    ## API Quotas and Rate Limits
+    API usage limits vary by subscription tier:
+    - **Free**: 50 requests/day (100 calls/month with daily distribution limit to prevent abuse)
+    - **Free Trial**: 50 requests/day for 7 days (during trial period)
+    - **Starter**: 300 requests/day (9,000 calls/month)
+    - **Basic**: 200 requests/minute (20,000 calls/month)
+    - **Pro**: 200 requests/minute (30,000 calls/month)
+
+    ## Pagination
+    All endpoints use cursor-based pagination for efficient handling of large result sets.
+
+  version: 1.0.0
+  contact:
+    name: NewsDataHub Support
+    email: support@newsdatahub.com
+    url: https://newsdatahub.com
+  license:
+    name: Proprietary
+    url: https://newsdatahub.com/terms-of-service
+
+servers:
+  - url: https://api.newsdatahub.com
+    description: Production server
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /v1/news:
+    get:
+      summary: Retrieve US political news articles
+      description: |
+        Get comprehensive US political news coverage including elections, policy debates, congressional activities, and government decisions.
+
+        **Access Levels:**
+        - **Free**: Content truncated to 100 characters, 48-hour delay, no keywords/topics/sentiment
+        - **Starter**: Full content, no keywords/topics/sentiment
+        - **Basic/Pro**: Full content with keywords, topics, and sentiment analysis
+
+      operationId: getNews
+      tags:
+        - News
+      parameters:
+        - name: q
+          in: query
+          description: Search query for article content (supports AND, OR, NOT operators)
+          required: false
+          schema:
+            type: string
+            example: "election OR senate OR congress"
+        - name: country
+          in: query
+          description: Filter by country codes (comma-separated, 2-letter ISO codes)
+          required: false
+          schema:
+            type: string
+            pattern: '^[A-Z]{2}(,[A-Z]{2})*$'
+            example: "US"
+        - name: topic
+          in: query
+          description: Filter by topics. Supports multiple values via repeated params (?topic=politics&topic=government) or comma-separated (?topic=politics,government)
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          example: "politics"
+        - name: language
+          in: query
+          description: Filter by language code (2-letter ISO code)
+          required: false
+          schema:
+            type: string
+            pattern: '^[a-z]{2}$'
+            example: "en"
+        - name: source
+          in: query
+          description: Filter by news source name. Supports multiple values via repeated params or comma-separated
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          example: "WHDH 7News"
+        - name: start_date
+          in: query
+          description: Start date for articles (ISO 8601 format, YYYY-MM-DD)
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2025-01-01"
+        - name: end_date
+          in: query
+          description: End date for articles (ISO 8601 format, YYYY-MM-DD, max 90 days from start_date)
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2025-03-31"
+        - name: per_page
+          in: query
+          description: |
+            Number of results per page (tier-dependent limits):
+            - Free: max 10
+            - Starter: max 20
+            - Basic: max 50
+            - Pro: max 100
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+            example: 20
+        - name: cursor
+          in: query
+          description: Pagination cursor from previous response
+          required: false
+          schema:
+            type: string
+        - name: political_leaning
+          in: query
+          description: Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [left, center_left, center, center_right, right, far_left, far_right]
+          style: form
+          explode: true
+          example: "center"
+        - name: source_type
+          in: query
+          description: Filter by source type. Supports multiple values via repeated params or comma-separated
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [digital_native, press_release, newspaper, magazine, mainstream_news, blog, specialty_news]
+          style: form
+          explode: true
+          example: "mainstream_news"
+        - name: exclude_topic
+          in: query
+          description: Exclude topics from results. Supports multiple values via repeated params or comma-separated
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          example: "sports"
+        - name: fields
+          in: query
+          description: Comma-separated list of fields to return (e.g., title,pub_date,source_title). Returns all fields if not specified. 'id' is always included.
+          required: false
+          schema:
+            type: string
+            example: "title,pub_date,source_title,description"
+      responses:
+        '200':
+          description: Successful response with US political news articles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsResponse'
+              example:
+                data:
+                  - id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                    title: "Senate Passes Bipartisan Infrastructure Bill"
+                    source_title: "Boston.com"
+                    source_link: "https://boston.com"
+                    article_link: "https://boston.com/news/politics/senate-infrastructure"
+                    keywords: ["senate", "infrastructure", "bipartisan", "legislation"]
+                    topics: ["politics", "government"]
+                    description: "The U.S. Senate approved a major infrastructure package with bipartisan support..."
+                    pub_date: "2025-01-15T14:30:00Z"
+                    creator: "Sarah Johnson"
+                    content: "The U.S. Senate approved a major infrastructure package with bipartisan support, marking a significant achievement..."
+                    media_url: "https://boston.com/images/capitol.jpg"
+                    media_type: "image"
+                    language: "en"
+                    sentiment:
+                      pos: 0.6
+                      neg: 0.1
+                      neu: 0.3
+                    source:
+                      id: "boston-com"
+                      country: "US"
+                      political_leaning: "center"
+                      reliability_score: 8.5
+                      type: "digital_native"
+                total_results: 45230
+                per_page: 20
+                next_cursor: "eyJvZmZzZXQiOjIwLCJ0aW1lc3RhbXAiOiIyMDI1LTAxLTE1VDE0OjMwOjAwWiJ9"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/top-news:
+    get:
+      summary: Retrieve top US political news
+      description: |
+        Get the latest US political news from mainstream media sources published within the last 24-72 hours.
+
+        Perfect for tracking breaking political developments, policy announcements, and major government actions.
+
+      operationId: getTopNews
+      tags:
+        - News
+      parameters:
+        - name: hours
+          in: query
+          description: Time window for top news in hours (24, 48, or 72)
+          required: false
+          schema:
+            type: integer
+            enum: [24, 48, 72]
+            default: 48
+            example: 24
+        - name: require_media
+          in: query
+          description: Whether to require articles to have media (images/videos)
+          required: false
+          schema:
+            type: boolean
+            default: false
+            example: true
+        - name: q
+          in: query
+          description: Search query for article content (supports AND, OR, NOT operators)
+          required: false
+          schema:
+            type: string
+            example: "white house OR congress"
+        - name: country
+          in: query
+          description: Filter by country codes (comma-separated, 2-letter ISO codes)
+          required: false
+          schema:
+            type: string
+            pattern: '^[A-Z]{2}(,[A-Z]{2})*$'
+            example: "US"
+        - name: topic
+          in: query
+          description: |
+            Filter by topics. Supports multiple values via repeated params or comma-separated.
+
+            **Default topics** (if not specified): politics, technology, business, finance, government, crime, health, sports
+
+            **Recommended topics**: Use the default topics listed above for best results, as articles are primarily curated for these categories.
+
+            Note: Articles may have additional topic tags, but filtering by non-default topics may return fewer or no results.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          example: "politics"
+        - name: language
+          in: query
+          description: Filter by language code (2-letter ISO code)
+          required: false
+          schema:
+            type: string
+            pattern: '^[a-z]{2}$'
+            example: "en"
+        - name: source
+          in: query
+          description: Filter by news source name. Supports multiple values via repeated params or comma-separated
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          example: "Boston.com"
+        - name: political_leaning
+          in: query
+          description: Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [left, center_left, center, center_right, right, far_left, far_right]
+          style: form
+          explode: true
+          example: "center"
+        - name: per_page
+          in: query
+          description: |
+            Number of results per page (tier-dependent limits):
+            - Free: max 10
+            - Starter: max 20
+            - Basic: max 50
+            - Pro: max 100
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+            example: 20
+        - name: cursor
+          in: query
+          description: Pagination cursor from previous response
+          required: false
+          schema:
+            type: string
+        - name: fields
+          in: query
+          description: Comma-separated list of fields to return (e.g., title,pub_date,source_title). Returns all fields if not specified. 'id' is always included.
+          required: false
+          schema:
+            type: string
+            example: "title,pub_date,source_title"
+      responses:
+        '200':
+          description: Successful response with top US political news
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsResponse'
+              example:
+                data:
+                  - id: "b2c3d4e5-f6a7-8901-2345-678901bcdefg"
+                    title: "President Announces New Climate Initiative"
+                    source_title: "WHDH 7News"
+                    source_link: "https://whdh.com"
+                    article_link: "https://whdh.com/news/president-climate-initiative"
+                    keywords: ["president", "climate", "policy", "environment"]
+                    topics: ["politics", "government"]
+                    description: "The President unveiled a sweeping climate initiative aimed at reducing emissions..."
+                    pub_date: "2025-01-15T16:00:00Z"
+                    creator: "Michael Chen"
+                    content: "The President unveiled a sweeping climate initiative aimed at reducing emissions and promoting clean energy..."
+                    media_url: "https://whdh.com/images/white-house.jpg"
+                    media_type: "image"
+                    language: "en"
+                    sentiment:
+                      pos: 0.7
+                      neg: 0.1
+                      neu: 0.2
+                    source:
+                      id: "whdh-7news"
+                      country: "US"
+                      political_leaning: "center"
+                      reliability_score: 8.0
+                      type: "mainstream_news"
+                total_results: 1240
+                per_page: 20
+                next_cursor: "eyJvZmZzZXQiOjIwLCJ0aW1lc3RhbXAiOiIyMDI1LTAxLTE1VDE2OjAwOjAwWiJ9"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/news/{article_id}/related:
+    get:
+      summary: Get related political articles
+      description: |
+        Find political articles similar to a given article using Elasticsearch's "More Like This" algorithm.
+
+        **Similarity matching**: Compares title, description, topics, and keywords to find related articles.
+
+        **Recency filter**: Only returns articles published within the last 60 days.
+
+        **Access Levels:**
+        - **Free**: Content truncated to 100 characters, 48-hour delay, no keywords/topics/sentiment
+        - **Starter**: Full content, no keywords/topics/sentiment
+        - **Basic/Pro**: Full content with keywords, topics, and sentiment analysis
+
+      operationId: getRelatedArticles
+      tags:
+        - News
+      parameters:
+        - name: article_id
+          in: path
+          description: The ID (UUID) of the article to find similar articles for
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+        - name: per_page
+          in: query
+          description: |
+            Number of related articles to return (tier-dependent limits):
+            - Free: max 10
+            - Starter: max 30
+            - Basic: max 50
+            - Pro: max 100
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 5
+            example: 5
+        - name: fields
+          in: query
+          description: Comma-separated list of fields to return (e.g., title,pub_date,source_title). Returns all fields if not specified. 'id' is always included.
+          required: false
+          schema:
+            type: string
+            example: "title,pub_date,source_title"
+      responses:
+        '200':
+          description: Successful response with related political articles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  related_to:
+                    type: string
+                    description: The article ID that was queried
+                    example: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                  count:
+                    type: integer
+                    description: Number of related articles returned
+                    example: 5
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NewsArticle'
+              example:
+                related_to: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                count: 3
+                data:
+                  - id: "c6d1fc78-2ff3-43e6-9889-2da0ea831262"
+                    title: "Congressional Leaders Respond to Policy Announcement"
+                    source_title: "Boston.com"
+                    pub_date: "2025-01-15T09:00:00Z"
+                  - id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    title: "Political Analysts Weigh In on New Legislation"
+                    source_title: "WHDH 7News"
+                    pub_date: "2025-01-14T18:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+  schemas:
+    NewsResponse:
+      type: object
+      required:
+        - data
+        - total_results
+        - per_page
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewsArticle'
+        total_results:
+          type: integer
+          description: Total number of articles matching criteria
+          example: 45230
+        per_page:
+          type: integer
+          description: Number of results per page
+          example: 20
+        next_cursor:
+          type: string
+          nullable: true
+          description: Cursor for next page (null if no more results)
+          example: "eyJvZmZzZXQiOjIwLCJ0aW1lc3RhbXAiOiIyMDI0LTAxLTE1VDEwOjMwOjAwWiJ9"
+
+    NewsArticle:
+      type: object
+      required:
+        - id
+        - title
+        - source_title
+        - source_link
+        - article_link
+        - description
+        - pub_date
+        - language
+      properties:
+        id:
+          type: string
+          description: Unique article identifier
+          example: "c6d1fc78-2ff3-43e6-9889-2da0ea831262"
+        title:
+          type: string
+          description: Article headline
+          example: "Senate Passes Bipartisan Infrastructure Bill"
+        source_title:
+          type: string
+          description: Name of the news source
+          example: "Boston.com"
+        source_link:
+          type: string
+          format: uri
+          description: URL of the news source
+          example: "https://boston.com"
+        article_link:
+          type: string
+          format: uri
+          description: Direct URL to the article
+          example: "https://boston.com/news/politics/senate-infrastructure"
+        keywords:
+          type: array
+          items:
+            type: string
+          description: Keywords associated with the article (Basic/Pro tiers only)
+          example: ["senate", "infrastructure", "bipartisan", "legislation"]
+        topics:
+          type: array
+          items:
+            type: string
+          description: Detected topics and categories (Basic/Pro tiers only)
+          example: ["politics", "government"]
+        description:
+          type: string
+          description: Article description or excerpt
+          example: "The U.S. Senate approved a major infrastructure package with bipartisan support..."
+        pub_date:
+          type: string
+          format: date-time
+          description: Article publication timestamp (ISO 8601)
+          example: "2025-01-15T14:30:00Z"
+        creator:
+          type: string
+          nullable: true
+          description: Article author
+          example: "Sarah Johnson"
+        content:
+          type: string
+          description: Full article content (truncated for free tier)
+          example: "The U.S. Senate approved a major infrastructure package with bipartisan support, marking a significant achievement..."
+        media_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to associated media
+          example: "https://boston.com/images/capitol.jpg"
+        media_type:
+          type: string
+          nullable: true
+          description: Type of media associated with the article
+          example: "image"
+        language:
+          type: string
+          description: Language code (2-letter ISO)
+          example: "en"
+        sentiment:
+          $ref: '#/components/schemas/Sentiment'
+        source:
+          $ref: '#/components/schemas/SourceMetadata'
+
+    Sentiment:
+      type: object
+      description: Sentiment analysis scores (Basic/Pro tiers only)
+      properties:
+        pos:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Positive sentiment score
+          example: 0.6
+        neg:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Negative sentiment score
+          example: 0.1
+        neu:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Neutral sentiment score
+          example: 0.3
+
+    SourceMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Source identifier
+          example: "boston-com"
+        country:
+          type: string
+          description: Source country code (2-letter ISO)
+          example: "US"
+        political_leaning:
+          type: string
+          description: Political leaning classification
+          example: "center"
+        reliability_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+          description: Reliability score (0-10)
+          example: 8.5
+        type:
+          type: string
+          description: Source type
+          example: "digital_native"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error type or brief description
+          example: "Bad Request"
+        message:
+          type: string
+          description: Detailed error message describing what went wrong
+          example: "Invalid country code format"
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Bad Request"
+            message: "Invalid country code format"
+
+    Unauthorized:
+      description: Missing or invalid API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Unauthorized"
+            message: "API key is either invalid or expired/deactivated"
+
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Too Many Requests"
+            message: "You have exceeded your monthly/daily quota or per-minute rate limit. Check the X-Quota-* and X-RateLimit-* headers for your current usage and limits, or upgrade to a higher quota tier."
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal Server Error"
+            message: "An unexpected error occurred on the server. Please try again later."
+
+tags:
+  - name: News
+    description: US political news with comprehensive filtering and search capabilities
