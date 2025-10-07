@@ -44,9 +44,9 @@ security:
 paths:
   /v1/news:
     get:
-      summary: Retrieve cryptocurrency and blockchain news
+      summary: Retrieve news articles
       description: |
-        Get comprehensive coverage of cryptocurrency, blockchain technology, DeFi, NFTs, and digital asset regulation.
+        Retrieve individual news articles with comprehensive filtering options.
 
         **Access Levels:**
         - **Free**: Content truncated to 100 characters, 48-hour delay, no keywords/topics/sentiment
@@ -74,7 +74,7 @@ paths:
             example: "US"
         - name: topic
           in: query
-          description: Filter by topics. Supports multiple values via repeated params (?topic=technology&topic=finance) or comma-separated (?topic=technology,finance)
+          description: Filter by topics. Supports multiple values via repeated params (?topic=health&topic=finance) or comma-separated (?topic=health,finance)
           required: false
           schema:
             type: array
@@ -93,7 +93,7 @@ paths:
             example: "en"
         - name: source
           in: query
-          description: Filter by news source name. Supports multiple values via repeated params or comma-separated
+          description: Filter by news source name. Supports multiple values via repeated params (?source=WHDH+7News&source=Boston.com) or comma-separated (?source=WHDH+7News,Boston.com)
           required: false
           schema:
             type: array
@@ -123,7 +123,7 @@ paths:
           description: |
             Number of results per page (tier-dependent limits):
             - Free: max 10
-            - Starter: max 20
+            - Starter: max 30
             - Basic: max 50
             - Pro: max 100
           required: false
@@ -141,7 +141,7 @@ paths:
             type: string
         - name: political_leaning
           in: query
-          description: Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right
+          description: "Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right"
           required: false
           schema:
             type: array
@@ -153,7 +153,7 @@ paths:
           example: "center"
         - name: source_type
           in: query
-          description: Filter by source type. Supports multiple values via repeated params or comma-separated
+          description: "Filter by source type. Supports multiple values via repeated params (?source_type=newspaper&source_type=magazine) or comma-separated (?source_type=newspaper,magazine)"
           required: false
           schema:
             type: array
@@ -183,7 +183,7 @@ paths:
             example: "title,pub_date,source_title,description"
       responses:
         '200':
-          description: Successful response with cryptocurrency news articles
+          description: Successful response with news articles
           content:
             application/json:
               schema:
@@ -228,11 +228,13 @@ paths:
 
   /v1/top-news:
     get:
-      summary: Retrieve top cryptocurrency news
+      summary: Retrieve top/breaking news articles
       description: |
-        Get the latest cryptocurrency and blockchain news from mainstream media sources published within the last 24-72 hours.
-
-        Perfect for tracking breaking crypto market developments, regulatory announcements, and major blockchain innovations.
+        Returns articles from major news organizations published within the last 
+        24-72 hours, filtered by key topics (politics, technology, business, etc.).
+        This endpoint surfaces important coverage from main stream news media but
+        does not guarantee breaking news or real-time updates. The only topics covered are: 
+          politics, technology, business, finance, government, crime, health, sports
 
       operationId: getTopNews
       tags:
@@ -309,7 +311,7 @@ paths:
           example: "Boston.com"
         - name: political_leaning
           in: query
-          description: Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right
+          description: "Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right"
           required: false
           schema:
             type: array
@@ -324,7 +326,7 @@ paths:
           description: |
             Number of results per page (tier-dependent limits):
             - Free: max 10
-            - Starter: max 20
+            - Starter: max 30
             - Basic: max 50
             - Pro: max 100
           required: false
@@ -349,7 +351,7 @@ paths:
             example: "title,pub_date,source_title"
       responses:
         '200':
-          description: Successful response with top cryptocurrency news
+          description: Successful response with top news articles
           content:
             application/json:
               schema:
@@ -394,9 +396,9 @@ paths:
 
   /v1/news/{article_id}/related:
     get:
-      summary: Get related cryptocurrency articles
+      summary: Get related articles
       description: |
-        Find cryptocurrency and blockchain articles similar to a given article using Elasticsearch's "More Like This" algorithm.
+        Find articles similar to a given article.
 
         **Similarity matching**: Compares title, description, topics, and keywords to find related articles.
 
@@ -443,16 +445,36 @@ paths:
             example: "title,pub_date,source_title"
       responses:
         '200':
-          description: Successful response with related crypto articles
+          description: Successful response with related articles
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   related_to:
-                    type: string
-                    description: The article ID that was queried
-                    example: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                    type: object
+                    description: Information about the source article that was queried
+                    properties:
+                      id:
+                        type: string
+                        description: The article ID (UUID)
+                        example: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                      title:
+                        type: string
+                        description: The article title
+                        example: "Bitcoin Price Reaches New Heights"
+                      source_title:
+                        type: string
+                        description: The news source name
+                        example: "CoinDesk"
+                      article_link:
+                        type: string
+                        description: Link to the original article
+                        example: "https://coindesk.com/article"
+                      pub_date:
+                        type: string
+                        description: Publication date in ISO 8601 format
+                        example: "2025-01-15T10:00:00Z"
                   count:
                     type: integer
                     description: Number of related articles returned
@@ -462,7 +484,12 @@ paths:
                     items:
                       $ref: '#/components/schemas/NewsArticle'
               example:
-                related_to: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                related_to:
+                  id: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                  title: "Bitcoin Price Reaches New Heights"
+                  source_title: "CoinDesk"
+                  article_link: "https://coindesk.com/article"
+                  pub_date: "2025-01-15T10:00:00Z"
                 count: 3
                 data:
                   - id: "c6d1fc78-2ff3-43e6-9889-2da0ea831262"
