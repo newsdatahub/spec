@@ -121,7 +121,7 @@ paths:
           description: |
             Number of results per page (tier-dependent limits):
             - Free: max 10
-            - Starter: max 30
+            - Starter: max 20
             - Basic: max 50
             - Pro: max 100
           required: false
@@ -324,7 +324,7 @@ paths:
           description: |
             Number of results per page (tier-dependent limits):
             - Free: max 10
-            - Starter: max 30
+            - Starter: max 20
             - Basic: max 50
             - Pro: max 100
           required: false
@@ -450,29 +450,9 @@ paths:
                 type: object
                 properties:
                   related_to:
-                    type: object
-                    description: Information about the source article that was queried
-                    properties:
-                      id:
-                        type: string
-                        description: The article ID (UUID)
-                        example: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
-                      title:
-                        type: string
-                        description: The article title
-                        example: "Breaking Technology News"
-                      source_title:
-                        type: string
-                        description: The news source name
-                        example: "TechCrunch"
-                      article_link:
-                        type: string
-                        description: Link to the original article
-                        example: "https://techcrunch.com/article"
-                      pub_date:
-                        type: string
-                        description: Publication date in ISO 8601 format
-                        example: "2025-01-15T10:00:00Z"
+                    type: string
+                    description: The article ID that was queried
+                    example: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
                   count:
                     type: integer
                     description: Number of related articles returned
@@ -482,12 +462,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/NewsArticle'
               example:
-                related_to:
-                  id: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
-                  title: "Breaking Technology News"
-                  source_title: "TechCrunch"
-                  article_link: "https://techcrunch.com/article"
-                  pub_date: "2025-01-15T10:00:00Z"
+                related_to: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
                 count: 3
                 data:
                   - id: "c6d1fc78-2ff3-43e6-9889-2da0ea831262"
