@@ -121,7 +121,7 @@ paths:
           description: |
             Number of results per page (tier-dependent limits):
             - Free: max 10
-            - Starter: max 20
+            - Starter: max 30
             - Basic: max 50
             - Pro: max 100
           required: false
@@ -139,7 +139,7 @@ paths:
             type: string
         - name: political_leaning
           in: query
-          description: Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right
+          description: "Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right"
           required: false
           schema:
             type: array
@@ -151,7 +151,7 @@ paths:
           example: "center"
         - name: source_type
           in: query
-          description: Filter by source type. Supports multiple values via repeated params (?source_type=newspaper&source_type=magazine) or comma-separated (?source_type=newspaper,magazine)
+          description: "Filter by source type. Supports multiple values via repeated params (?source_type=newspaper&source_type=magazine) or comma-separated (?source_type=newspaper,magazine)"
           required: false
           schema:
             type: array
@@ -174,7 +174,7 @@ paths:
           example: "sports"
         - name: fields
           in: query
-          description: Comma-separated list of fields to return (e.g., title,pub_date,source_title). Returns all fields if not specified. 'id' is always included.
+          description: "Comma-separated list of fields to return (e.g., title,pub_date,source_title). Returns all fields if not specified. 'id' is always included."
           required: false
           schema:
             type: string
@@ -309,7 +309,7 @@ paths:
           example: "Boston.com"
         - name: political_leaning
           in: query
-          description: Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right
+          description: "Filter by source political leaning. Supports multiple values via repeated params or comma-separated. Values: left, center_left, center, center_right, right, far_left, far_right"
           required: false
           schema:
             type: array
@@ -324,7 +324,7 @@ paths:
           description: |
             Number of results per page (tier-dependent limits):
             - Free: max 10
-            - Starter: max 20
+            - Starter: max 30
             - Basic: max 50
             - Pro: max 100
           required: false
@@ -342,7 +342,7 @@ paths:
             type: string
         - name: fields
           in: query
-          description: Comma-separated list of fields to return (e.g., title,pub_date,source_title). Returns all fields if not specified. 'id' is always included.
+          description: "Comma-separated list of fields to return (e.g., title,pub_date,source_title). Returns all fields if not specified. 'id' is always included."
           required: false
           schema:
             type: string
@@ -436,7 +436,7 @@ paths:
             example: 5
         - name: fields
           in: query
-          description: Comma-separated list of fields to return (e.g., title,pub_date,source_title). Returns all fields if not specified. 'id' is always included.
+          description: "Comma-separated list of fields to return (e.g., title,pub_date,source_title). Returns all fields if not specified. 'id' is always included."
           required: false
           schema:
             type: string
@@ -450,9 +450,29 @@ paths:
                 type: object
                 properties:
                   related_to:
-                    type: string
-                    description: The article ID that was queried
-                    example: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                    type: object
+                    description: Information about the source article that was queried
+                    properties:
+                      id:
+                        type: string
+                        description: The article ID (UUID)
+                        example: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                      title:
+                        type: string
+                        description: The article title
+                        example: "Breaking Technology News"
+                      source_title:
+                        type: string
+                        description: The news source name
+                        example: "TechCrunch"
+                      article_link:
+                        type: string
+                        description: Link to the original article
+                        example: "https://techcrunch.com/article"
+                      pub_date:
+                        type: string
+                        description: Publication date in ISO 8601 format
+                        example: "2025-01-15T10:00:00Z"
                   count:
                     type: integer
                     description: Number of related articles returned
@@ -462,7 +482,12 @@ paths:
                     items:
                       $ref: '#/components/schemas/NewsArticle'
               example:
-                related_to: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                related_to:
+                  id: "fa90d4bd-f901-4ea6-8b4d-e6f7a451d311"
+                  title: "Breaking Technology News"
+                  source_title: "TechCrunch"
+                  article_link: "https://techcrunch.com/article"
+                  pub_date: "2025-01-15T10:00:00Z"
                 count: 3
                 data:
                   - id: "c6d1fc78-2ff3-43e6-9889-2da0ea831262"
